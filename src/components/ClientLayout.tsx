@@ -1,9 +1,13 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import Sidebar from './Sidebar';
+import { Suspense, lazy } from 'react';
 import { Toaster } from 'sonner';
 import dynamic from 'next/dynamic';
+import LoadingSpinner from './LoadingSpinner';
+
+// Lazy load the Sidebar component
+const Sidebar = lazy(() => import('./Sidebar'));
 
 // Dynamically import the SearchStatusNotification component
 const SearchStatusNotification = dynamic(
@@ -18,8 +22,12 @@ export default function ClientLayout({
 }) {
   return (
     <ThemeProvider attribute="class" enableSystem={false} defaultTheme="dark">
-      <Sidebar>{children}</Sidebar>
-      <SearchStatusNotification />
+      <Suspense fallback={<div className="flex h-screen w-screen items-center justify-center"><LoadingSpinner size="lg" /></div>}>
+        <Sidebar>{children}</Sidebar>
+      </Suspense>
+      <Suspense fallback={null}>
+        <SearchStatusNotification />
+      </Suspense>
       <Toaster
         toastOptions={{
           unstyled: true,
