@@ -7,6 +7,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: CEREBRAS_API_KEY
+        value: csk-5f9ftpvvtker983wvkkcym8eem65tey64khtptwhxfmenp9w
     healthCheckPath: /
     autoDeploy: true
     plan: free
