@@ -339,9 +339,14 @@ class MetaSearchAgent implements MetaSearchAgentType {
     query: string,
     docs: Document[],
     fileIds: string[],
-    embeddings: Embeddings,
+    embeddings: Embeddings | undefined,
     optimizationMode: 'speed' | 'balanced' | 'quality',
   ) {
+    // If embeddings is undefined, just return the docs as is
+    if (!embeddings) {
+      console.warn('No embeddings available for reranking, returning docs as is');
+      return docs.slice(0, 15);
+    }
     if (docs.length === 0 && fileIds.length === 0) {
       return docs;
     }
