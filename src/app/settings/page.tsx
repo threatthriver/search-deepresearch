@@ -16,8 +16,12 @@ interface SettingsType {
     [key: string]: [Record<string, any>];
   };
   cerebrasApiKey: string;
+  deepResearchApiKey: string;
+  deepResearchDailyLimit: number;
   creator: string;
   version: string;
+  theme: 'light' | 'dark' | 'system';
+  animations: boolean;
 }
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -419,11 +423,49 @@ const Page = () => {
         config && (
           <div className="flex flex-col space-y-6 pb-28 lg:pb-8">
             <SettingsSection title="Appearance">
-              <div className="flex flex-col space-y-1">
-                <p className="text-black/70 dark:text-white/70 text-sm">
-                  Theme
-                </p>
-                <ThemeSwitcher />
+              <div className="flex flex-col space-y-4">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-black/70 dark:text-white/70 text-sm">
+                    Theme
+                  </p>
+                  <ThemeSwitcher />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-light-secondary dark:bg-dark-secondary rounded-lg hover:bg-light-200 dark:hover:bg-dark-200 transition-colors">
+                  <div>
+                    <p className="text-sm text-black/90 dark:text-white/90 font-medium">
+                      Enable Animations
+                    </p>
+                    <p className="text-xs text-black/60 dark:text-white/60 mt-0.5">
+                      Smooth transitions and animations throughout the app
+                    </p>
+                  </div>
+                  <Switch
+                    checked={config?.animations !== false}
+                    onChange={(checked) => {
+                      setConfig((prev) => ({
+                        ...prev!,
+                        animations: checked,
+                      }));
+                      saveConfig('animations', checked);
+                    }}
+                    className={cn(
+                      config?.animations !== false
+                        ? 'bg-blue-500'
+                        : 'bg-light-200 dark:bg-dark-200',
+                      'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        config?.animations !== false
+                          ? 'translate-x-6'
+                          : 'translate-x-1',
+                        'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                      )}
+                    />
+                  </Switch>
+                </div>
               </div>
             </SettingsSection>
 
@@ -605,71 +647,7 @@ const Page = () => {
                 </div>
               )}
 
-              {selectedChatModelProvider &&
-                selectedChatModelProvider === 'custom_openai' && (
-                  <div className="flex flex-col space-y-4">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-black/70 dark:text-white/70 text-sm">
-                        Model Name
-                      </p>
-                      <Input
-                        type="text"
-                        placeholder="Model name"
-                        value={config.customOpenaiModelName}
-                        isSaving={savingStates['customOpenaiModelName']}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setConfig((prev) => ({
-                            ...prev!,
-                            customOpenaiModelName: e.target.value,
-                          }));
-                        }}
-                        onSave={(value) =>
-                          saveConfig('customOpenaiModelName', value)
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-black/70 dark:text-white/70 text-sm">
-                        Custom OpenAI API Key
-                      </p>
-                      <Input
-                        type="text"
-                        placeholder="Custom OpenAI API Key"
-                        value={config.customOpenaiApiKey}
-                        isSaving={savingStates['customOpenaiApiKey']}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setConfig((prev) => ({
-                            ...prev!,
-                            customOpenaiApiKey: e.target.value,
-                          }));
-                        }}
-                        onSave={(value) =>
-                          saveConfig('customOpenaiApiKey', value)
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-black/70 dark:text-white/70 text-sm">
-                        Custom OpenAI Base URL
-                      </p>
-                      <Input
-                        type="text"
-                        placeholder="Custom OpenAI Base URL"
-                        value={config.customOpenaiApiUrl}
-                        isSaving={savingStates['customOpenaiApiUrl']}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setConfig((prev) => ({
-                            ...prev!,
-                            customOpenaiApiUrl: e.target.value,
-                          }));
-                        }}
-                        onSave={(value) =>
-                          saveConfig('customOpenaiApiUrl', value)
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
+
 
               {config.embeddingModelProviders && (
                 <div className="flex flex-col space-y-4 mt-4 pt-4 border-t border-light-200 dark:border-dark-200">
@@ -751,117 +729,48 @@ const Page = () => {
               <div className="flex flex-col space-y-4">
                 <div className="flex flex-col space-y-1">
                   <p className="text-black/70 dark:text-white/70 text-sm">
-                    OpenAI API Key
+                    Cerebras API Key
                   </p>
                   <Input
                     type="text"
-                    placeholder="OpenAI API Key"
-                    value={config.openaiApiKey}
-                    isSaving={savingStates['openaiApiKey']}
+                    placeholder="Cerebras API Key"
+                    value={config.cerebrasApiKey}
+                    isSaving={savingStates['cerebrasApiKey']}
                     onChange={(e) => {
                       setConfig((prev) => ({
                         ...prev!,
-                        openaiApiKey: e.target.value,
+                        cerebrasApiKey: e.target.value,
                       }));
                     }}
-                    onSave={(value) => saveConfig('openaiApiKey', value)}
+                    onSave={(value) => saveConfig('cerebrasApiKey', value)}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Powers the main chat functionality with Llama 3.3 70B
+                  </p>
                 </div>
 
                 <div className="flex flex-col space-y-1">
                   <p className="text-black/70 dark:text-white/70 text-sm">
-                    Ollama API URL
+                    Deep Research API Key
                   </p>
                   <Input
                     type="text"
-                    placeholder="Ollama API URL"
-                    value={config.ollamaApiUrl}
-                    isSaving={savingStates['ollamaApiUrl']}
+                    placeholder="Deep Research API Key"
+                    value={config.deepResearchApiKey || ''}
+                    isSaving={savingStates['deepResearchApiKey']}
                     onChange={(e) => {
                       setConfig((prev) => ({
                         ...prev!,
-                        ollamaApiUrl: e.target.value,
+                        deepResearchApiKey: e.target.value,
                       }));
                     }}
-                    onSave={(value) => saveConfig('ollamaApiUrl', value)}
+                    onSave={(value) => saveConfig('deepResearchApiKey', value)}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Limited to {config.deepResearchDailyLimit || 1} search per day for detailed research paper analysis
+                  </p>
                 </div>
 
-                <div className="flex flex-col space-y-1">
-                  <p className="text-black/70 dark:text-white/70 text-sm">
-                    GROQ API Key
-                  </p>
-                  <Input
-                    type="text"
-                    placeholder="GROQ API Key"
-                    value={config.groqApiKey}
-                    isSaving={savingStates['groqApiKey']}
-                    onChange={(e) => {
-                      setConfig((prev) => ({
-                        ...prev!,
-                        groqApiKey: e.target.value,
-                      }));
-                    }}
-                    onSave={(value) => saveConfig('groqApiKey', value)}
-                  />
-                </div>
-
-                <div className="flex flex-col space-y-1">
-                  <p className="text-black/70 dark:text-white/70 text-sm">
-                    Anthropic API Key
-                  </p>
-                  <Input
-                    type="text"
-                    placeholder="Anthropic API key"
-                    value={config.anthropicApiKey}
-                    isSaving={savingStates['anthropicApiKey']}
-                    onChange={(e) => {
-                      setConfig((prev) => ({
-                        ...prev!,
-                        anthropicApiKey: e.target.value,
-                      }));
-                    }}
-                    onSave={(value) => saveConfig('anthropicApiKey', value)}
-                  />
-                </div>
-
-                <div className="flex flex-col space-y-1">
-                  <p className="text-black/70 dark:text-white/70 text-sm">
-                    Gemini API Key
-                  </p>
-                  <Input
-                    type="text"
-                    placeholder="Gemini API key"
-                    value={config.geminiApiKey}
-                    isSaving={savingStates['geminiApiKey']}
-                    onChange={(e) => {
-                      setConfig((prev) => ({
-                        ...prev!,
-                        geminiApiKey: e.target.value,
-                      }));
-                    }}
-                    onSave={(value) => saveConfig('geminiApiKey', value)}
-                  />
-                </div>
-
-                <div className="flex flex-col space-y-1">
-                  <p className="text-black/70 dark:text-white/70 text-sm">
-                    Deepseek API Key
-                  </p>
-                  <Input
-                    type="text"
-                    placeholder="Deepseek API Key"
-                    value={config.deepseekApiKey}
-                    isSaving={savingStates['deepseekApiKey']}
-                    onChange={(e) => {
-                      setConfig((prev) => ({
-                        ...prev!,
-                        deepseekApiKey: e.target.value,
-                      }));
-                    }}
-                    onSave={(value) => saveConfig('deepseekApiKey', value)}
-                  />
-                </div>
               </div>
             </SettingsSection>
           </div>

@@ -1,8 +1,8 @@
 {
-  "name": "perplexica-frontend",
-  "version": "1.10.2",
+  "name": "insightflow",
+  "version": "1.0.0",
   "license": "MIT",
-  "author": "ItzCrazyKns",
+  "author": "Aniket Kumar",
   "scripts": {
     "dev": "next dev",
     "build": "npm run db:push && next build",

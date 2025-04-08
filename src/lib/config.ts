@@ -13,6 +13,10 @@ interface Config {
     CEREBRAS: {
       API_KEY: string;
     };
+    DEEP_RESEARCH: {
+      API_KEY: string;
+      DAILY_LIMIT: number;
+    };
   };
   API_ENDPOINTS: {
     SEARXNG: string;
@@ -66,8 +70,18 @@ export const getVersion = () => {
   return config?.APP?.VERSION || '1.0.0';
 };
 
+// Deep Research API (limited to 1 search per day)
+export const getDeepResearchApiKey = () => {
+  const config = loadConfig();
+  return config?.MODELS?.DEEP_RESEARCH?.API_KEY || '';
+};
+
+export const getDeepResearchDailyLimit = () => {
+  const config = loadConfig();
+  return config?.MODELS?.DEEP_RESEARCH?.DAILY_LIMIT || 1;
+};
+
 // These functions are kept for backward compatibility but return empty strings
-// since we're focusing only on Cerebras integration
 export const getOpenaiApiKey = () => '';
 export const getGroqApiKey = () => '';
 export const getAnthropicApiKey = () => '';
