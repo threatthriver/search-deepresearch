@@ -40,7 +40,7 @@ const SearchStatusNotification: React.FC<WelcomeMessageProps> = ({ onClose }) =>
           <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Welcome to InsightFlow!</h3>
           <div className="mt-1 text-sm text-blue-700 dark:text-blue-400">
             <p>
-              I'm excited to have you try out InsightFlow, powered by Cerebras Llama 3.3 70B. Ask me anything, and I'll provide intelligent insights and answers.
+              I&apos;m excited to have you try out InsightFlow, powered by Cerebras Llama 3.3 70B. Ask me anything, and I&apos;ll provide intelligent insights and answers.
             </p>
             <p className="mt-2 text-xs flex items-center">
               <MessageSquare className="inline h-3 w-3 mr-1" />
