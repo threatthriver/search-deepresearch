@@ -153,11 +153,12 @@ const checkConfig = async (
 
       if (
         embeddingModelProvider &&
-        !embeddingModelProviders[embeddingModelProvider][embeddingModel]
+        embeddingModelProviders[embeddingModelProvider] &&
+        (!embeddingModel || !embeddingModelProviders[embeddingModelProvider][embeddingModel])
       ) {
-        embeddingModel = Object.keys(
-          embeddingModelProviders[embeddingModelProvider],
-        )[0];
+        // Safely get the first available embedding model
+        const availableModels = Object.keys(embeddingModelProviders[embeddingModelProvider] || {});
+        embeddingModel = availableModels.length > 0 ? availableModels[0] : '';
         localStorage.setItem('embeddingModel', embeddingModel);
       }
     }
@@ -167,10 +168,13 @@ const checkConfig = async (
       provider: chatModelProvider,
     });
 
-    setEmbeddingModelProvider({
-      name: embeddingModel!,
-      provider: embeddingModelProvider,
-    });
+    // Only set embedding model provider if we have a valid model
+    if (embeddingModel && embeddingModelProvider) {
+      setEmbeddingModelProvider({
+        name: embeddingModel,
+        provider: embeddingModelProvider,
+      });
+    }
 
     setIsConfigReady(true);
   } catch (err) {
