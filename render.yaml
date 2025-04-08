@@ -2,8 +2,8 @@ services:
   - type: web
     name: insightflow
     env: node
-    buildCommand: yarn --frozen-lockfile install; npm run build
-    startCommand: npm start
+    buildCommand: yarn --frozen-lockfile && yarn build
+    startCommand: yarn start
     envVars:
       - key: NODE_ENV
         value: production
