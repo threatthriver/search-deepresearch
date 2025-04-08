@@ -1,6 +1,5 @@
-import db from '@/lib/db';
-import { chats, messages } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+// This API route is now a placeholder since we're using browser localStorage
+// for chat history instead of a database
 
 export const GET = async (
   req: Request,
@@ -9,22 +8,12 @@ export const GET = async (
   try {
     const { id } = await params;
 
-    const chatExists = await db.query.chats.findFirst({
-      where: eq(chats.id, id),
-    });
-
-    if (!chatExists) {
-      return Response.json({ message: 'Chat not found' }, { status: 404 });
-    }
-
-    const chatMessages = await db.query.messages.findMany({
-      where: eq(messages.chatId, id),
-    });
-
+    // Since we're using localStorage, we return a message instructing the client
+    // to use localStorage instead
     return Response.json(
       {
-        chat: chatExists,
-        messages: chatMessages,
+        message: 'Chat history is now stored in browser localStorage',
+        chatId: id
       },
       { status: 200 },
     );
@@ -44,19 +33,13 @@ export const DELETE = async (
   try {
     const { id } = await params;
 
-    const chatExists = await db.query.chats.findFirst({
-      where: eq(chats.id, id),
-    });
-
-    if (!chatExists) {
-      return Response.json({ message: 'Chat not found' }, { status: 404 });
-    }
-
-    await db.delete(chats).where(eq(chats.id, id)).execute();
-    await db.delete(messages).where(eq(messages.chatId, id)).execute();
-
+    // Since we're using localStorage, we return a message instructing the client
+    // to use localStorage instead
     return Response.json(
-      { message: 'Chat deleted successfully' },
+      {
+        message: 'Chat history is now stored in browser localStorage. Use localStorage.removeItem() to delete chats.',
+        chatId: id
+      },
       { status: 200 },
     );
   } catch (err) {

@@ -1,10 +1,17 @@
-import db from '@/lib/db';
+// This API route is now a placeholder since we're using browser localStorage
+// for chat history instead of a database
 
 export const GET = async (req: Request) => {
   try {
-    let chats = await db.query.chats.findMany();
-    chats = chats.reverse();
-    return Response.json({ chats: chats }, { status: 200 });
+    // Since we're using localStorage, we return a message instructing the client
+    // to use localStorage instead
+    return Response.json(
+      {
+        message: 'Chat history is now stored in browser localStorage',
+        chats: []
+      },
+      { status: 200 },
+    );
   } catch (err) {
     console.error('Error in getting chats: ', err);
     return Response.json(
