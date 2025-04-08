@@ -3,8 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { getAvailableEmbeddingModelProviders } from '@/lib/providers';
-import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
-import { DocxLoader } from '@langchain/community/document_loaders/fs/docx';
+import { PDFLoader } from '@/lib/document-loaders/pdf-loader';
+import { DocxLoader } from '@/lib/document-loaders/docx-loader';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { Document } from 'langchain/document';
 
