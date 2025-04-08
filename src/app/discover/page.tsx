@@ -171,7 +171,21 @@ const Page = () => {
     setDisplayedItems(filtered.slice(0, ITEMS_PER_PAGE));
     setHasMore(filtered.length > ITEMS_PER_PAGE);
     setPage(1);
-  }, [categoryFilter, sortOption, searchQuery]);
+  }, [categoryFilter, sortOption, searchQuery, allItems, ITEMS_PER_PAGE]);
+
+  // Define loadMoreItems function before using it in useCallback
+  const loadMoreItems = useCallback(() => {
+    if (!hasMore || loading) return;
+
+    const nextPage = page + 1;
+    const startIndex = (nextPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+
+    const newItems = allItems.slice(startIndex, endIndex);
+    setDisplayedItems(prev => [...prev, ...newItems]);
+    setPage(nextPage);
+    setHasMore(endIndex < allItems.length);
+  }, [hasMore, loading, page, ITEMS_PER_PAGE, allItems]);
 
   // Infinite scrolling logic
   const lastItemRef = useCallback((node: HTMLElement | null) => {
@@ -185,20 +199,7 @@ const Page = () => {
     });
 
     if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
-
-  const loadMoreItems = () => {
-    if (!hasMore || loading) return;
-
-    const nextPage = page + 1;
-    const startIndex = (nextPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-
-    const newItems = allItems.slice(startIndex, endIndex);
-    setDisplayedItems(prev => [...prev, ...newItems]);
-    setPage(nextPage);
-    setHasMore(endIndex < allItems.length);
-  };
+  }, [loading, hasMore, loadMoreItems]);
 
   const handleRefresh = () => {
     fetchData(true);

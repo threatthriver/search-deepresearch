@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Lightbulb, Brain, Zap, Search, FileText, Code, Share2, Download, Sparkles } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Brain, Zap, Search, FileText, Code, Share2, Download, Sparkles, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import InsightFlowLogo from '@/components/InsightFlowLogo';
 import { motion, AnimatePresence } from 'framer-motion';
