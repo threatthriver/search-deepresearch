@@ -4,22 +4,11 @@ import crypto from 'crypto';
 import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { EventEmitter } from 'stream';
 import {
-  chatModelProviders,
-  embeddingModelProviders,
   getAvailableChatModelProviders,
   getAvailableEmbeddingModelProviders,
 } from '@/lib/providers';
-import db from '@/lib/db';
-import { chats, messages as messagesSchema } from '@/lib/db/schema';
-import { and, eq, gt } from 'drizzle-orm';
 import { getFileDetails } from '@/lib/utils/files';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ChatOpenAI } from '@langchain/openai';
-import {
-  getCustomOpenaiApiKey,
-  getCustomOpenaiApiUrl,
-  getCustomOpenaiModelName,
-} from '@/lib/config';
 import { searchHandlers } from '@/lib/search';
 
 export const runtime = 'nodejs';
@@ -57,7 +46,6 @@ const handleEmitterEvents = async (
   writer: WritableStreamDefaultWriter,
   encoder: TextEncoder,
   aiMessageId: string,
-  chatId: string,
 ) => {
   let recievedMessage = '';
   let sources: any[] = [];
@@ -101,18 +89,8 @@ const handleEmitterEvents = async (
     );
     writer.close();
 
-    db.insert(messagesSchema)
-      .values({
-        content: recievedMessage,
-        chatId: chatId,
-        messageId: aiMessageId,
-        role: 'assistant',
-        metadata: JSON.stringify({
-          createdAt: new Date(),
-          ...(sources && sources.length > 0 && { sources }),
-        }),
-      })
-      .execute();
+    // We've removed the database operations here
+    // Messages are now stored in browser localStorage instead
   });
   stream.on('error', (data) => {
     const parsedData = JSON.parse(data);
@@ -128,57 +106,16 @@ const handleEmitterEvents = async (
   });
 };
 
+// This function is now a no-op since we're using browser localStorage for history
 const handleHistorySave = async (
   message: Message,
   humanMessageId: string,
   focusMode: string,
   files: string[],
 ) => {
-  const chat = await db.query.chats.findFirst({
-    where: eq(chats.id, message.chatId),
-  });
-
-  if (!chat) {
-    await db
-      .insert(chats)
-      .values({
-        id: message.chatId,
-        title: message.content,
-        createdAt: new Date().toString(),
-        focusMode: focusMode,
-        files: files.map(getFileDetails),
-      })
-      .execute();
-  }
-
-  const messageExists = await db.query.messages.findFirst({
-    where: eq(messagesSchema.messageId, humanMessageId),
-  });
-
-  if (!messageExists) {
-    await db
-      .insert(messagesSchema)
-      .values({
-        content: message.content,
-        chatId: message.chatId,
-        messageId: humanMessageId,
-        role: 'user',
-        metadata: JSON.stringify({
-          createdAt: new Date(),
-        }),
-      })
-      .execute();
-  } else {
-    await db
-      .delete(messagesSchema)
-      .where(
-        and(
-          gt(messagesSchema.id, messageExists.id),
-          eq(messagesSchema.chatId, message.chatId),
-        ),
-      )
-      .execute();
-  }
+  // History is now managed in the browser via localStorage
+  // See useChatHistory.ts for implementation
+  return;
 };
 
 export const POST = async (req: Request) => {
@@ -219,18 +156,9 @@ export const POST = async (req: Request) => {
       ];
 
     let llm: BaseChatModel | undefined;
-    let embedding = embeddingModel.model;
+    let embedding = embeddingModel?.model;
 
-    if (body.chatModel?.provider === 'custom_openai') {
-      llm = new ChatOpenAI({
-        openAIApiKey: getCustomOpenaiApiKey(),
-        modelName: getCustomOpenaiModelName(),
-        temperature: 0.7,
-        configuration: {
-          baseURL: getCustomOpenaiApiUrl(),
-        },
-      }) as unknown as BaseChatModel;
-    } else if (chatModelProvider && chatModel) {
+    if (chatModelProvider && chatModel) {
       llm = chatModel.model;
     }
 
@@ -289,7 +217,7 @@ export const POST = async (req: Request) => {
     const writer = responseStream.writable.getWriter();
     const encoder = new TextEncoder();
 
-    handleEmitterEvents(stream, writer, encoder, aiMessageId, message.chatId);
+    handleEmitterEvents(stream, writer, encoder, aiMessageId);
     handleHistorySave(message, humanMessageId, body.focusMode, body.files);
 
     return new Response(responseStream.readable, {
@@ -311,8 +239,6 @@ export const POST = async (req: Request) => {
         errorMessage = 'Could not connect to search service. SearxNG may not be running or configured correctly.';
       } else if (err.message.includes('Invalid URL')) {
         errorMessage = 'Invalid search service URL. Please check your SearxNG configuration.';
-      } else if (err.message.includes('no such table')) {
-        errorMessage = 'Database error: Table not found. Please run "npm run db:push" to initialize the database.';
       }
     }
 

@@ -1,11 +1,26 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import * as schema from './schema';
-import path from 'path';
+// This is a placeholder file for the removed database functionality
+// We're now using browser localStorage for storing chat history
 
-const sqlite = new Database(path.join(process.cwd(), 'data/db.sqlite'));
-const db = drizzle(sqlite, {
-  schema: schema,
-});
+// Mock db object with no-op methods
+const db = {
+  query: {
+    chats: {
+      findFirst: async () => null,
+    },
+    messages: {
+      findFirst: async () => null,
+    },
+  },
+  insert: () => ({
+    values: () => ({
+      execute: async () => {},
+    }),
+  }),
+  delete: () => ({
+    where: () => ({
+      execute: async () => {},
+    }),
+  }),
+};
 
 export default db;
