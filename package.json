@@ -5,11 +5,10 @@
   "author": "Aniket Kumar",
   "scripts": {
     "dev": "next dev",
-    "build": "npm run db:push && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format:write": "prettier . --write",
-    "db:push": "drizzle-kit push"
+    "format:write": "prettier . --write"
   },
   "dependencies": {
     "@cerebras/cerebras_cloud_sdk": "^1.28.0",
