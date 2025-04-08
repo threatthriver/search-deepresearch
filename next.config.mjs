@@ -27,8 +27,6 @@ const nextConfig = {
   reactStrictMode: true,
   // Enable gzip compression
   compress: true,
-  // Optimize fonts
-  optimizeFonts: true,
   // Add trailing slash for better SEO
   trailingSlash: false,
   // Increase timeout for builds
@@ -37,10 +35,6 @@ const nextConfig = {
   experimental: {
     // Enable optimizeCss for better CSS optimization
     optimizeCss: true,
-    // Enable server components
-    serverComponents: true,
-    // Enable concurrent features
-    concurrentFeatures: true,
   },
 };
 
