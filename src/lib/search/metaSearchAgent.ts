@@ -268,7 +268,7 @@ class MetaSearchAgent implements MetaSearchAgentType {
   private async createAnsweringChain(
     llm: BaseChatModel,
     fileIds: string[],
-    embeddings: Embeddings,
+    embeddings: Embeddings | undefined,
     optimizationMode: 'speed' | 'balanced' | 'quality',
     systemInstructions: string,
   ) {
@@ -299,13 +299,22 @@ class MetaSearchAgent implements MetaSearchAgentType {
             docs = searchRetrieverResult.docs;
           }
 
-          const sortedDocs = await this.rerankDocs(
-            query,
-            docs ?? [],
-            fileIds,
-            embeddings,
-            optimizationMode,
-          );
+          let sortedDocs = [];
+
+          // Only rerank docs if embeddings are available
+          if (embeddings) {
+            sortedDocs = await this.rerankDocs(
+              query,
+              docs ?? [],
+              fileIds,
+              embeddings,
+              optimizationMode,
+            );
+          } else {
+            // If no embeddings are available, just use the docs as is
+            sortedDocs = docs ?? [];
+            console.warn('No embeddings available, skipping reranking');
+          }
 
           return sortedDocs;
         })
@@ -501,7 +510,7 @@ class MetaSearchAgent implements MetaSearchAgentType {
     message: string,
     history: BaseMessage[],
     llm: BaseChatModel,
-    embeddings: Embeddings,
+    embeddings: Embeddings | undefined,
     optimizationMode: 'speed' | 'balanced' | 'quality',
     fileIds: string[],
     systemInstructions: string,

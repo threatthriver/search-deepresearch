@@ -146,14 +146,17 @@ export const POST = async (req: Request) => {
         body.chatModel?.name || Object.keys(chatModelProvider)[0]
       ];
 
-    const embeddingProvider =
-      embeddingModelProviders[
-        body.embeddingModel?.provider || Object.keys(embeddingModelProviders)[0]
-      ];
-    const embeddingModel =
-      embeddingProvider[
-        body.embeddingModel?.name || Object.keys(embeddingProvider)[0]
-      ];
+    // Safely get the embedding provider and model
+    const embeddingProviderKey = body.embeddingModel?.provider ||
+      (Object.keys(embeddingModelProviders).length > 0 ? Object.keys(embeddingModelProviders)[0] : 'deep_research');
+
+    const embeddingProvider = embeddingModelProviders[embeddingProviderKey] || {};
+
+    // Safely get the embedding model
+    const embeddingModelKey = body.embeddingModel?.name ||
+      (Object.keys(embeddingProvider).length > 0 ? Object.keys(embeddingProvider)[0] : '');
+
+    const embeddingModel = embeddingProvider[embeddingModelKey];
 
     let llm: BaseChatModel | undefined;
     let embedding = embeddingModel?.model;
@@ -166,11 +169,10 @@ export const POST = async (req: Request) => {
       return Response.json({ error: 'Invalid chat model' }, { status: 400 });
     }
 
+    // Make embedding optional for chat functionality
+    // If no embedding model is available, we can still use the chat model
     if (!embedding) {
-      return Response.json(
-        { error: 'Invalid embedding model' },
-        { status: 400 },
-      );
+      console.warn('No embedding model available, proceeding with chat only');
     }
 
     const humanMessageId =
