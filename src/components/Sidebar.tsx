@@ -1,12 +1,14 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { BookOpenText, Home, Search, Settings, Lightbulb, History } from 'lucide-react';
+import { BookOpenText, Home, Search, Settings, Lightbulb, History, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useSelectedLayoutSegments } from 'next/navigation';
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 import Layout from './Layout';
 import InsightFlowLogo from './InsightFlowLogo';
+import { useAuth } from '@/lib/firebase/auth/AuthContext';
+import Image from 'next/image';
 
 const VerticalIconContainer = ({ children }: { children: ReactNode }) => {
   return (
@@ -16,6 +18,7 @@ const VerticalIconContainer = ({ children }: { children: ReactNode }) => {
 
 const Sidebar = ({ children }: { children: React.ReactNode }) => {
   const segments = useSelectedLayoutSegments();
+  const { user, loading } = useAuth();
 
   const navLinks = [
     {
@@ -71,14 +74,49 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
             ))}
           </VerticalIconContainer>
 
-          <Link href="/settings">
-            <Settings className="cursor-pointer" />
-          </Link>
+          <div className="space-y-4">
+            {!loading && (
+              <>
+                {user ? (
+                  <Link
+                    href="/profile"
+                    title={user.displayName || 'Profile'}
+                  >
+                    {user.photoURL ? (
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <Image
+                          src={user.photoURL}
+                          alt={user.displayName || 'User'}
+                          width={32}
+                          height={32}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                        <User size={16} />
+                      </div>
+                    )}
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    title="Login"
+                  >
+                    <LogIn className="cursor-pointer text-blue-500" />
+                  </Link>
+                )}
+              </>
+            )}
+            <Link href="/settings">
+              <Settings className="cursor-pointer" />
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="fixed bottom-0 w-full z-50 flex flex-row items-center gap-x-6 bg-light-primary dark:bg-dark-primary px-4 py-4 shadow-sm lg:hidden">
-        {navLinks.map((link, i) => (
+        {navLinks.slice(0, 4).map((link, i) => (
           <Link
             href={link.href}
             key={i}
@@ -96,6 +134,36 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
             <p className="text-xs">{link.label}</p>
           </Link>
         ))}
+
+        {/* Profile or Login Link */}
+        <Link
+          href={user ? '/profile' : '/login'}
+          className="relative flex flex-col items-center space-y-1 text-center w-full"
+        >
+          {user ? (
+            <>
+              {user.photoURL ? (
+                <div className="w-6 h-6 rounded-full overflow-hidden">
+                  <Image
+                    src={user.photoURL}
+                    alt={user.displayName || 'User'}
+                    width={24}
+                    height={24}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <User size={20} />
+              )}
+              <p className="text-xs">Profile</p>
+            </>
+          ) : (
+            <>
+              <LogIn size={20} />
+              <p className="text-xs">Login</p>
+            </>
+          )}
+        </Link>
       </div>
 
       <Layout>{children}</Layout>
