@@ -29,7 +29,9 @@ async function main() {
   // Process the streaming response
   console.log("Response from Cerebras Llama 3.3 70B model:");
   for await (const chunk of stream) {
-    process.stdout.write(chunk.choices[0]?.delta?.content || '');
+    // Add type assertion to handle the unknown type
+    const typedChunk = chunk as { choices: Array<{ delta?: { content?: string } }> };
+    process.stdout.write(typedChunk.choices[0]?.delta?.content || '');
   }
   console.log("\n\nResponse complete!");
 }
